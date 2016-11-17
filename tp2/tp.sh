@@ -24,5 +24,5 @@ case $key in
 esac
 shift
 done
-
+echo Installing dependencies
 npm install && node index.js $ALGO $EX_PATH $OPTIONS
