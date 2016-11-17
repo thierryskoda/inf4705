@@ -25,4 +25,4 @@ esac
 shift
 done
 
-node index.js $ALGO $EX_PATH $OPTIONS
+npm install && node index.js $ALGO $EX_PATH $OPTIONS
