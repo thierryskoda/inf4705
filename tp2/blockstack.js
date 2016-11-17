@@ -155,7 +155,7 @@ module.exports = class BlockStack {
     let voisinageList = this.allBlocks
     let tourActuelle = []
     let iterWithoutOptimize = 0
-    let hauteurTourMaximal = 0
+    let tourMaximal = []
 
     while(iterWithoutOptimize < 100) {
       // Choisir un bloc au hasard parmi dans la liste des blocs voisinages
@@ -216,18 +216,18 @@ module.exports = class BlockStack {
       })
 
       // Calcul de la hauteur de la tour
-      let hauteurActuelle = tourActuelle.reduce((a,b) => a + b.height, 0)
+      // let hauteurActuelle = tourActuelle.reduce((a,b) => a + b.height, 0)
 
       iterWithoutOptimize++
 
       // Si la hauteur actuelle est plus grande que celle qu'on avait en mémoire,
       // on remplace et on met le compteur à zéro
-      if(hauteurActuelle > hauteurTourMaximal) {
-        hauteurTourMaximal = hauteurActuelle
+      if(tourActuelle.reduce((a,b) => a + b.height, 0) > tourMaximal.reduce((a,b) => a + b.height, 0)) {
+        tourMaximal = tourActuelle
         iterWithoutOptimize = 0
       }
     }
 
-    return hauteurTourMaximal
+    return tourMaximal
   }
 }

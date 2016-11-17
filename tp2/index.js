@@ -14,7 +14,7 @@ if(!ALGO_TYPE && ALGO_TYPE !== 'vorace' && ALGO_TYPE != 'progdyn' && ALGO_TYPE !
 
 // PATH
 if(PATH === "all") {
-  throw "No path specified. Use : 'tp.sh -a ALGO_GOES_HERE -e PATH_DATA"
+  throw "No path specified. Use : 'tp.sh -a ALGO_GOES_HERE -e PATH_GOES_HERE"
 }
 
 // OPTIONS
@@ -29,6 +29,7 @@ if(!OPTIONS) {
   }
 }
 
+global.PATH = PATH[0]
 global.PRINT_TIME = PRINT_TIME
 global.PRINT_NUMBERS = PRINT_NUMBERS
 

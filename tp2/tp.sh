@@ -25,4 +25,4 @@ esac
 shift
 done
 
-node ../index.js $ALGO $EX_PATH $OPTIONS
+node index.js $ALGO $EX_PATH $OPTIONS
