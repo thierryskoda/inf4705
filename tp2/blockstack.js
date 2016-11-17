@@ -16,7 +16,11 @@ module.exports = class BlockStack {
     let array = fs.readFileSync(file).toString().split("\n")
 
     // Remove the last element because it's a space
-    if(array[array.length-1] == '') {
+    if(array[array.length-1] == '' || !array[array.length-1]) {
+      array.pop()
+    }
+
+    if(array[array.length-1] == '' || !array[array.length-1]) {
       array.pop()
     }
 
@@ -24,6 +28,7 @@ module.exports = class BlockStack {
     array.slice(1).forEach((line) => {
       let sides = line.split(' ')
 
+      // console.log("side:", sides)
       this.allBlocks.push(this.createDimension(parseInt(sides[0]), parseInt(sides[1]), parseInt(sides[2])))
       this.allBlocks.push(this.createDimension(parseInt(sides[1]), parseInt(sides[0]), parseInt(sides[2])))
       this.allBlocks.push(this.createDimension(parseInt(sides[2]), parseInt(sides[1]), parseInt(sides[0])))
@@ -139,28 +144,6 @@ module.exports = class BlockStack {
         this.height = height;
       }
     })
-
-    // console.log("indexArray:", indexArray)
-    // console.log("heightArray:", heightArray)
-    // console.log("maxIndice:", maxIndice)
-    // console.log("height for this indice is:", this.allBlocks[maxIndice].height)
-    // console.log("maxHeight:", maxHeight)
-
-    // Start
-    // let hauteurTmp = maxHeight - this.allBlocks[maxIndice].height
-    // console.log("first hauteurTmp:", hauteurTmp)
-    // let newIndice = maxIndice
-    // this.stacks.push(this.allBlocks[maxIndice])
-
-    // for (var i = 0; i < maxIndice; i++) {
-    //   for (var j = 0; j < newIndice; j++) {
-    //     if(heightArray[j] === hauteurTmp) {
-    //       hauteurTmp -= this.allBlocks[i].height
-    //       this.stacks.push(this.allBlocks[j])
-    //       newIndice = i
-    //     }
-    //   }
-    // }
   }
 
   /**
@@ -168,68 +151,56 @@ module.exports = class BlockStack {
    */
   solveTabou() {
 
-
-    // Chacun de ses blocs sera alors tabou pour un nombdre d'itérations entre 7 et 10
-    // Le voisin choisi est celui qui maximise la hauteur de la tour
-
     let tabouList = []
-    let iterWithoutFinding = 0
+    let voisinageList = this.allBlocks
+    let tourActuelle = []
+    let iterWithoutOptimize = 0
+    let hauteurTourMaximal = 0
 
-    console.log("this:", this.allBlocks)
+    while(iterWithoutOptimize < 100) {
+      // Choisir un bloc au hasard parmi dans la liste des blocs voisinages
+      let block = voisinageList.splice([Math.floor( Math.random() * voisinageList.length) ], 1)[0]
 
-    for(;;) {
-      // Arrêter après 100 itérations sans trouver quelque chose
-      if(iterWithoutFinding === 100) return this.stacks.forEach(b => this.height += b.height)
-
-      // Choisir un bloc parmi ceux ne faisant pas partie de la tour NI de la liste taboue
-      let block = this.allBlocks.find((b) => (!this.stacks.find(sb => sb.id === b.id) && !tabouList.find(tb => tb.id === b.id)) )
-
-      // Placer ce bloc sur un bloc qui peut recevoir ce bloc dans la tour
-      // Cette insertion peut engendrer le retrait de certains blocs directement au-dessus pour conserver l'équilibre de la tour
+      // On passe à travers la tour actuelle
       let placedABlock = false
+      tourActuelle.forEach((b, index) => {
 
-      console.log("block:", block)
+        // Si le block qu'on a choisi peut fit sur le block courrant
+        if(block.smallerThen(b)) {
 
-      if(!this.stacks.length) {
-        this.stacks.push(block)
-        placedABlock = true
-      } else {
-        this.stacks.some((b, index) => {
+          // On place le block à cette position
+          tourActuelle.splice(index, 0, block)
+          placedABlock = true
 
-          if(block.smallerThen(b)) {
+          // On enlève les bloques par dessus si ils ne fit plus!
+          verifierBlocs(index)
+        }
+      })
 
-            // console.log("index", index + 1);
+      // Si on a pas placé le block dans la tour par dessus un autre block, on le place à la fin
+      if(!placedABlock) {
+        tourActuelle.push(block)
+        verifierBlocs(tourActuelle.length - 1)
+      }
 
-            // Le block courrant est plus petit que le prochain block donc on l'ajoute à la tour à la bonne position
-            // this.stacks.splice(index, 0, b)
-
-            // On enlève les bloques par dessus
-            let toPutInTabou =  this.stacks.slice(index, 9e9)
-            this.stacks.length = index
-            // On rajoute le block
-            this.stacks.push(b)
-            placedABlock = true
-
-            toPutInTabou.forEach((b) => {
-              b.nombreIteration = 0
-              b.maxNombreIteration = Math.floor( Math.random() * 4 + 7 )
-              tabouList.push(b)
-            })
-
-            // Trouver si il y a des blocks qui ne 'fit' plus. On regarde tous les blocks après celui qu'on vient d'ajouter
-            // for (var i = index + 1; i < this.stacks.length; i++) {
-            //   if(!this.stacks[i].smallerThen(i-1)) {
-            //     // Ça veut dire que le block est plus gros que le précédant donc on l'enlève et place dans tabou
-            //     this.stacks[i].nombreIteration = 0
-            //     this.stacks[i].maxNombreIteration = Math.floor( Math.random() * 4 + 7 )
-            //     tabouList.push(this.stacks[i])
-            //     this.stacks.splice(i, 1)
-            //   }
-            // }
-
-            // Exit the loop
-            return true
+      // Helper function pour enlever les blocks qui ne fit pu à partir de l'index en paramètre
+      function verifierBlocs(index) {
+        let blocsToDelete = []
+        for (var i = index - 1; i >= 0; i--) {
+          // Si le block courrant n'est pas plus petit que le block par dessus
+          // On le place dans la liste des blocs à enlever
+          if(!tourActuelle[i].smallerThen(tourActuelle[index])) {
+            let blockToPutInTabou = tourActuelle.slice(i, i + 1)[0]
+            blocsToDelete.push(i)
+            blockToPutInTabou.nombreIteration = 0
+            blockToPutInTabou.maxNombreIteration = Math.floor( Math.random() * 4 + 7 )
+            tabouList.push(blockToPutInTabou)
           }
+        }
+
+        // Ici on enlève les blocs de la tour que nous avons identifé comme mauvais
+        blocsToDelete.forEach((index) => {
+          tourActuelle.splice(index, 1)
         })
       }
 
@@ -237,14 +208,26 @@ module.exports = class BlockStack {
       tabouList.forEach((b, index) => {
         b.nombreIteration++
         if(b.nombreIteration === b.maxNombreIteration) {
-          tabouList.splice(index, 1)
+          let block = tabouList.splice(index, 1)[0]
+          delete block.maxNombreIteration
+          delete block.nombreIteration
+          voisinageList.push(block)
         }
       })
 
-      // On a rien trouvé
-      if(!placedABlock) {
-        iterWithoutFinding++
+      // Calcul de la hauteur de la tour
+      let hauteurActuelle = tourActuelle.reduce((a,b) => a + b.height, 0)
+
+      iterWithoutOptimize++
+
+      // Si la hauteur actuelle est plus grande que celle qu'on avait en mémoire,
+      // on remplace et on met le compteur à zéro
+      if(hauteurActuelle > hauteurTourMaximal) {
+        hauteurTourMaximal = hauteurActuelle
+        iterWithoutOptimize = 0
       }
     }
+
+    return hauteurTourMaximal
   }
 }

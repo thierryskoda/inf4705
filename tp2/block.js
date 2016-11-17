@@ -1,6 +1,5 @@
 'use strict'
 // Création des bloques
-var idCounter = 0
 module.exports = class Block {
 
   constructor(height, side1, side2, surface) {
@@ -8,8 +7,6 @@ module.exports = class Block {
     this.length = side2
     this.height = height
     this.surface = surface || this.side1 * this.side2
-    this.id = idCounter
-    idCounter++
   }
 
   // On regarde pour chaque block si il peut entre par dessus l'autre avant
