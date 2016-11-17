@@ -2,7 +2,7 @@
 let BlockStack = require('./blockstack')
 let Block = require('./block')
 let Utils = require('./utils')
-let Constants = require('./Constants')
+let Constants = require('./constants')
 let ExportService = require('./export')
 
 let exportData = []
