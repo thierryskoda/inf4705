@@ -29,7 +29,22 @@ if(!OPTIONS) {
   }
 }
 
-require('./vorace')
-// require('./dynamic')
+global.PRINT_TIME = PRINT_TIME
+global.PRINT_NUMBERS = PRINT_NUMBERS
+
+if(ALGO_TYPE === 'vorace') {
+  require('./vorace')
+}
+
+if(ALGO_TYPE === 'progdyn') {
+  require('./dynamic')
+}
+
+if(ALGO_TYPE === 'tabou') {
+  require('./tabou')
+}
+
+
+
 
 
