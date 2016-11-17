@@ -1,5 +1,5 @@
-// require('./vorace')
-// require('./dynamic')
+require('./vorace')
+require('./dynamic')
 require('./tabou')
 
 
